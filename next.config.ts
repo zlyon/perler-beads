@@ -5,29 +5,18 @@ const withPWA = require("next-pwa")({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
-  buildExcludes: [/middleware-manifest\.json$/],
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "offlineCache",
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 30 * 24 * 60 * 60,
-        },
-      },
-    },
+  buildExcludes: [
+    /middleware-manifest\.json$/,
+    // 👇 直接排除那个超大的 cache 文件夹！
+    /cache\/.*$/
   ],
-  // 👇 新增：限制缓存文件大小，解决 25MB 限制
-  maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+  maximumFileSizeToCacheInBytes: 1, // 彻底禁用大文件缓存
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  // 👇 新增：关闭超大源码映射 + 开启压缩
   productionBrowserSourceMaps: false,
   compress: true,
+  output: "export",  // 👈 最关键：纯静态导出，不生成多余大文件
 };
 
 export default withPWA(nextConfig);
